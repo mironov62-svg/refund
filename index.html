@@ -54,7 +54,6 @@
 <input type="text" id="dealId" inputmode="numeric" placeholder="Например: 12345">
 
 <label>Фото (до 300 КБ)</label>
-<input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
 <button id="btnPhoto" type="button">📷 Сделать фото</button>
 <img id="preview" alt="preview">
 <div id="info"></div>
@@ -69,13 +68,14 @@
 <script>
 // ==== НАСТРОЙКИ ====
 const WEBHOOK = "https://b24-964ige.bitrix24.ru/rest/1/v2wlsum3d4zu1ceb/";
+const PORTAL = "https://b24-964ige.bitrix24.ru";
+const MANAGER_ID = "1"; // ID сотрудника для уведомления
 const MAX_SIZE = 300 * 1024; // 300 КБ
 const FIXED_PHRASE = "Возврат МИ в ЛУ"; // первая строка комментария
 
 // ==== ЭЛЕМЕНТЫ ====
 const $ = id => document.getElementById(id);
 const dealIdEl = $("dealId");
-const photoInput = $("photoInput");
 const btnPhoto = $("btnPhoto");
 const btnSend = $("btnSend");
 const preview = $("preview");
@@ -86,24 +86,39 @@ let photoBase64 = null;
 let photoName = null;
 
 // ==== ФОТО ====
-btnPhoto.addEventListener("click", () => photoInput.click());
+btnPhoto.addEventListener("click", () => {
+  // Пересоздаём input — лечит «залипание» камеры на iOS/Android
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.capture = "environment";
+  input.style.display = "none";
 
-photoInput.addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  input.addEventListener("change", async (e) => {
+    const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+    if (!file) {
+      input.remove();
+      return;
+    }
 
-  info.textContent = "Обработка фото...";
-  try {
-    const { base64, size, name } = await compressImage(file);
-    photoBase64 = base64;
-    photoName = name;
-    preview.src = "data:image/jpeg;base64," + base64;
-    preview.style.display = "block";
-    info.textContent = `Готово: ${name}, ~${Math.round(size / 1024)} КБ`;
-  } catch (err) {
-    console.error(err);
-    info.textContent = "Ошибка обработки фото: " + err.message;
-  }
+    info.textContent = "Обработка фото...";
+    try {
+      const { base64, size, name } = await compressImage(file);
+      photoBase64 = base64;
+      photoName = name;
+      preview.src = "data:image/jpeg;base64," + base64;
+      preview.style.display = "block";
+      info.textContent = `Готово: ${name}, ~${Math.round(size / 1024)} КБ`;
+    } catch (err) {
+      console.error(err);
+      info.textContent = "Ошибка обработки фото: " + err.message;
+    } finally {
+      input.remove();
+    }
+  });
+
+  document.body.appendChild(input);
+  input.click();
 });
 
 // Сжатие изображения через canvas
@@ -185,6 +200,7 @@ btnSend.addEventListener("click", async () => {
       fields.FILES = [[photoName, photoBase64]];
     }
 
+    // 1) Добавляем комментарий в таймлайн сделки
     const resp = await fetch(WEBHOOK + "crm.timeline.comment.add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -195,16 +211,43 @@ btnSend.addEventListener("click", async () => {
 
     if (data.error) {
       showStatus("Ошибка Битрикс24: " + data.error_description, false);
-    } else {
-      showStatus("✅ Комментарий добавлен в сделку " + dealId, true);
-      // Сброс формы
-      photoBase64 = null;
-      photoName = null;
-      preview.style.display = "none";
-      photoInput.value = "";
-      info.textContent = "";
-      $("comment").value = "";
+      return;
     }
+
+    // 2) Отправляем уведомление сотруднику
+    const dealLink = `${PORTAL}/crm/deal/details/${dealId}/`;
+    const notifyText = `МИ возвращено.\nСделка: ${dealLink}`;
+
+    let notifyNote = "";
+    try {
+      const notifyResp = await fetch(WEBHOOK + "im.message.add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          DIALOG_ID: MANAGER_ID,
+          MESSAGE: notifyText,
+          URL_PREVIEW: "Y"
+        })
+      });
+      const notifyData = await notifyResp.json();
+      if (notifyData.error) {
+        console.warn("Не удалось отправить уведомление:", notifyData.error_description);
+        notifyNote = `\n⚠️ Уведомление не отправлено: ${notifyData.error_description}`;
+      }
+    } catch (e) {
+      console.warn("Ошибка отправки уведомления:", e);
+      notifyNote = `\n⚠️ Уведомление не отправлено: ${e.message}`;
+    }
+
+    showStatus("✅ Комментарий добавлен в сделку " + dealId + notifyNote, true);
+
+    // Сброс формы
+    photoBase64 = null;
+    photoName = null;
+    preview.style.display = "none";
+    info.textContent = "";
+    $("comment").value = "";
+
   } catch (err) {
     console.error(err);
     showStatus("Сетевая ошибка: " + err.message, false);
