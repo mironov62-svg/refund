@@ -70,6 +70,7 @@
 // ==== НАСТРОЙКИ ====
 const WEBHOOK = "https://b24-964ige.bitrix24.ru/rest/1/v2wlsum3d4zu1ceb/";
 const MAX_SIZE = 300 * 1024; // 300 КБ
+const FIXED_PHRASE = "Возврат МИ в ЛУ"; // первая строка комментария
 
 // ==== ЭЛЕМЕНТЫ ====
 const $ = id => document.getElementById(id);
@@ -167,11 +168,16 @@ btnSend.addEventListener("click", async () => {
   showStatus("Отправка...", true);
 
   try {
+    // Фиксированная первая строка + комментарий пользователя
+    const fullComment = comment
+      ? FIXED_PHRASE + "\n" + comment
+      : FIXED_PHRASE;
+
     // Формируем объект fields (Битрикс24 ожидает вложенный объект)
     const fields = {
       ENTITY_TYPE: "deal",
       ENTITY_ID: dealId,
-      COMMENT: comment || "(без комментария)"
+      COMMENT: fullComment
     };
 
     // FILES — массив пар [имя_файла, base64_строка]
