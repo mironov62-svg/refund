@@ -34,10 +34,52 @@
     font-weight: 600;
   }
   #btnPhoto { background: #2fc6f6; color: #fff; }
+  #btnGallery { background: #7a8bff; color: #fff; }
   #btnSend { background: #1db954; color: #fff; }
   button:disabled { opacity: 0.6; }
-  #preview { margin-top: 10px; max-width: 100%; border-radius: 8px; display: none; }
   #info { margin-top: 8px; font-size: 13px; color: #666; }
+
+  /* Сетка превью */
+  #previews {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .thumb {
+    position: relative;
+    padding-top: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #e5e7eb;
+  }
+  .thumb img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .thumb .del {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    font-size: 16px;
+    line-height: 26px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
   #status {
     margin-top: 16px; padding: 12px; border-radius: 8px;
     font-size: 14px; display: none; white-space: pre-wrap;
@@ -53,9 +95,10 @@
 <label for="dealId">ID сделки</label>
 <input type="text" id="dealId" inputmode="numeric" placeholder="Например: 12345">
 
-<label>Фото (до 300 КБ)</label>
+<label>Фото (до 300 КБ каждое)</label>
 <button id="btnPhoto" type="button">📷 Сделать фото</button>
-<img id="preview" alt="preview">
+<button id="btnGallery" type="button">🖼 Выбрать из галереи</button>
+<div id="previews"></div>
 <div id="info"></div>
 
 <label for="comment">Комментарий</label>
@@ -70,32 +113,45 @@
 const WEBHOOK = "https://b24-964ige.bitrix24.ru/rest/1/v2wlsum3d4zu1ceb/";
 const PORTAL = "https://b24-964ige.bitrix24.ru";
 const MANAGER_ID = "1"; // ID сотрудника для уведомления
-const MAX_SIZE = 300 * 1024; // 300 КБ
+const MAX_SIZE = 300 * 1024; // 300 КБ на файл
 const FIXED_PHRASE = "Возврат МИ в ЛУ"; // первая строка комментария
 
 // Пользовательское поле сделки, которое нужно ставить в "Да"
 const UF_FIELD = "UF_CRM_1791016249";
 const UF_VALUE_YES = 1; // 1 = "Да" для поля типа "Список"
 
+// Максимум фото за раз (чтобы не превысить лимиты Битрикс24)
+const MAX_PHOTOS = 5;
+
 // ==== ЭЛЕМЕНТЫ ====
 const $ = id => document.getElementById(id);
 const dealIdEl = $("dealId");
 const btnPhoto = $("btnPhoto");
+const btnGallery = $("btnGallery");
 const btnSend = $("btnSend");
-const preview = $("preview");
+const previewsEl = $("previews");
 const info = $("info");
 const status = $("status");
 
-let photoBase64 = null;
-let photoName = null;
+// Массив прикреплённых фото: { base64, name, size }
+let photos = [];
 
-// ==== ФОТО ====
-btnPhoto.addEventListener("click", () => {
-  // Пересоздаём input — лечит «залипание» камеры на iOS/Android
+// Флаг, что идёт обработка файла — блокирует кнопки фото
+let isProcessing = false;
+
+// ==== ВЫБОР ФОТО ====
+// capture = "environment" — открыть камеру; capture = null — галерея
+function pickPhoto(useCamera) {
+  if (isProcessing) return;
+  if (photos.length >= MAX_PHOTOS) {
+    info.textContent = `Достигнут лимит: ${MAX_PHOTOS} фото`;
+    return;
+  }
+
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/*";
-  input.capture = "environment";
+  if (useCamera) input.capture = "environment";
   input.style.display = "none";
 
   input.addEventListener("change", async (e) => {
@@ -105,25 +161,62 @@ btnPhoto.addEventListener("click", () => {
       return;
     }
 
+    // Блокируем кнопки на время обработки
+    isProcessing = true;
+    btnPhoto.disabled = true;
+    btnGallery.disabled = true;
     info.textContent = "Обработка фото...";
+
     try {
       const { base64, size, name } = await compressImage(file);
-      photoBase64 = base64;
-      photoName = name;
-      preview.src = "data:image/jpeg;base64," + base64;
-      preview.style.display = "block";
-      info.textContent = `Готово: ${name}, ~${Math.round(size / 1024)} КБ`;
+      photos.push({ base64, name, size });
+      renderPreviews();
+      info.textContent = `Добавлено: ${name}, ~${Math.round(size / 1024)} КБ. Всего: ${photos.length}`;
     } catch (err) {
       console.error(err);
       info.textContent = "Ошибка обработки фото: " + err.message;
     } finally {
+      isProcessing = false;
+      btnPhoto.disabled = false;
+      btnGallery.disabled = false;
       input.remove();
     }
   });
 
   document.body.appendChild(input);
   input.click();
-});
+}
+
+btnPhoto.addEventListener("click", () => pickPhoto(true));
+btnGallery.addEventListener("click", () => pickPhoto(false));
+
+// Отрисовка превью-сетки
+function renderPreviews() {
+  previewsEl.innerHTML = "";
+  photos.forEach((p, idx) => {
+    const wrap = document.createElement("div");
+    wrap.className = "thumb";
+
+    const img = document.createElement("img");
+    img.src = "data:image/jpeg;base64," + p.base64;
+    img.alt = p.name;
+
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "del";
+    del.textContent = "✕";
+    del.title = "Удалить";
+    del.addEventListener("click", () => {
+      photos.splice(idx, 1);
+      renderPreviews();
+      info.textContent = photos.length ? `Фото: ${photos.length}` : "";
+    });
+
+    wrap.appendChild(img);
+    wrap.appendChild(del);
+    previewsEl.appendChild(wrap);
+  });
+}
 
 // Сжатие изображения через canvas
 function compressImage(file, maxSize = MAX_SIZE) {
@@ -181,7 +274,8 @@ btnSend.addEventListener("click", async () => {
   const comment = $("comment").value.trim();
 
   if (!dealId) return showStatus("Укажите ID сделки", false);
-  if (!comment && !photoBase64) return showStatus("Добавьте комментарий или фото", false);
+  if (!comment && photos.length === 0) return showStatus("Добавьте комментарий или фото", false);
+  if (isProcessing) return showStatus("Дождитесь окончания обработки фото", false);
 
   btnSend.disabled = true;
   showStatus("Отправка...", true);
@@ -200,8 +294,8 @@ btnSend.addEventListener("click", async () => {
     };
 
     // FILES — массив пар [имя_файла, base64_строка]
-    if (photoBase64) {
-      fields.FILES = [[photoName, photoBase64]];
+    if (photos.length > 0) {
+      fields.FILES = photos.map(p => [p.name, p.base64]);
     }
 
     // 1) Добавляем комментарий в таймлайн сделки
@@ -269,9 +363,8 @@ btnSend.addEventListener("click", async () => {
     showStatus("✅ Комментарий добавлен в сделку " + dealId + ufNote + notifyNote, true);
 
     // Сброс формы
-    photoBase64 = null;
-    photoName = null;
-    preview.style.display = "none";
+    photos = [];
+    renderPreviews();
     info.textContent = "";
     $("comment").value = "";
 
