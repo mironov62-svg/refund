@@ -73,6 +73,10 @@ const MANAGER_ID = "1"; // ID сотрудника для уведомления
 const MAX_SIZE = 300 * 1024; // 300 КБ
 const FIXED_PHRASE = "Возврат МИ в ЛУ"; // первая строка комментария
 
+// Пользовательское поле сделки, которое нужно ставить в "Да"
+const UF_FIELD = "UF_CRM_1791016249";
+const UF_VALUE_YES = 1; // 1 = "Да" для поля типа "Список"
+
 // ==== ЭЛЕМЕНТЫ ====
 const $ = id => document.getElementById(id);
 const dealIdEl = $("dealId");
@@ -214,7 +218,30 @@ btnSend.addEventListener("click", async () => {
       return;
     }
 
-    // 2) Отправляем уведомление сотруднику
+    // 2) Обновляем пользовательское поле UF_CRM_1791016249 = Да (1)
+    let ufNote = "";
+    try {
+      const ufResp = await fetch(WEBHOOK + "crm.deal.update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: dealId,
+          fields: { [UF_FIELD]: UF_VALUE_YES }
+        })
+      });
+      const ufData = await ufResp.json();
+      if (ufData.error) {
+        console.warn("Не удалось обновить поле " + UF_FIELD + ":", ufData.error_description);
+        ufNote = `\n⚠️ Поле МИ возврат не обновлено: ${ufData.error_description}`;
+      } else {
+        ufNote = `\n✅ Поле МИ возврат=Да`;
+      }
+    } catch (e) {
+      console.warn("Ошибка обновления поля:", e);
+      ufNote = `\n⚠️ Поле МИ возврат не обновлено: ${e.message}`;
+    }
+
+    // 3) Отправляем уведомление сотруднику
     const dealLink = `${PORTAL}/crm/deal/details/${dealId}/`;
     const notifyText = `МИ возвращено.\nСделка: ${dealLink}`;
 
@@ -239,7 +266,7 @@ btnSend.addEventListener("click", async () => {
       notifyNote = `\n⚠️ Уведомление не отправлено: ${e.message}`;
     }
 
-    showStatus("✅ Комментарий добавлен в сделку " + dealId + notifyNote, true);
+    showStatus("✅ Комментарий добавлен в сделку " + dealId + ufNote + notifyNote, true);
 
     // Сброс формы
     photoBase64 = null;
