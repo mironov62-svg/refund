@@ -13,7 +13,26 @@
     max-width: 500px;
     margin: 0 auto;
   }
-  h1 { font-size: 20px; margin-bottom: 16px; }
+
+  /* Шапка: логотип слева, затем заголовок */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .header .logo {
+    height: 40px;
+    width: auto;
+    flex-shrink: 0;
+    display: block;
+  }
+  .header h1 {
+    font-size: 20px;
+    margin: 0;
+  }
+
   label { display: block; font-weight: 600; margin: 12px 0 6px; }
   input[type="text"], textarea {
     width: 100%;
@@ -90,7 +109,12 @@
 </head>
 <body>
 
-<h1>Возврат МИ в ЛУ</h1>
+<div class="header">
+  <img class="logo"
+       src="https://github.com/mironov62-svg/refund/blob/main/lpu.png?raw=true"
+       alt="Логотип">
+  <h1>Возврат МИ в ЛУ</h1>
+</div>
 
 <label for="dealId">ID сделки</label>
 <input type="text" id="dealId" inputmode="numeric" placeholder="Например: 12345">
