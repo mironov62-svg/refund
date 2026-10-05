@@ -3,60 +3,235 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Возврат МИ в ЛУ</title>
+<title>Возврат МИ в ЛУ · ГрандМедТех</title>
+
+<link rel="icon" href="https://mironov62-svg.github.io/SID_DSH/assets/favicon.png" type="image/png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700%7CPoppins:400,500,600,700&display=swap" rel="stylesheet">
+
 <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --phone: #ffad00;
+    --violet: #9e43fa;
+    --violet-2: #a044ff;
+    --success: #459647;
+    --bg: #101010;
+    --bg-panel: rgba(0, 0, 0, 0.45);
+    --bg-panel-2: #17151c;
+    --text: #ffffff;
+    --text-soft: rgba(255, 255, 255, 0.78);
+    --text-muted: rgba(255, 255, 255, 0.55);
+    --border: rgba(255, 255, 255, 0.12);
+    --radius-xl: 15px;
+    --radius-md: 8px;
+    --radius-lg: 10px;
+
+    --grad-header: linear-gradient(272deg, rgb(84, 99, 130) 0%, rgb(92, 66, 131) 98%);
+    --grad-btn: linear-gradient(to right, #6a3093 0%, #a044ff 51%, #6a3093 100%);
+    --grad-stepper: linear-gradient(135deg, #6a3093 0%, #a044ff 100%);
+
+    --box-glow: rgb(119 54 222) -1px 11px 35px -20px, rgb(152 62 212) 1px 1px 20px -30px;
+    --transition: all 0.3s ease;
+  }
+
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    padding: 16px;
-    background: #f5f6f8;
-    color: #222;
-    max-width: 500px;
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 14px;
+    background-color: var(--bg);
+    background-image: radial-gradient(circle at 50% 0%, rgba(106, 48, 147, 0.4) 0%, transparent 60%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: var(--text);
+  }
+
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 15px 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 900px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--box-glow);
+    overflow: visible;
+  }
+
+  /* ШАПКА */
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 10px 24px;
+    background: var(--grad-header);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  .site-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #fff;
+  }
+
+  .site-logo img {
+    height: 40px;
+    width: auto;
+    display: block;
+  }
+
+  .site-logo-text b {
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: block;
+    line-height: 1.1;
+  }
+
+  .site-logo-text span {
+    font-size: 10px;
+    opacity: 0.8;
+  }
+
+  .site-contacts { text-align: right; }
+  .site-contacts a {
+    display: block;
+    text-decoration: none;
+    color: #fff;
+    line-height: 1.2;
+  }
+  .site-phone { color: var(--phone); font-weight: 600; font-size: 16px; }
+  .site-mail { font-size: 13px; opacity: 0.9; }
+
+  /* ЗАГОЛОВОК */
+  .header-block {
+    padding: 12px 20px 10px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .header-block h2 {
+    font-size: 19px;
+    margin-bottom: 4px;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .header-block p {
+    font-size: 11.5px;
+    color: var(--text-soft);
+    line-height: 1.3;
+    max-width: 600px;
     margin: 0 auto;
   }
 
-  /* Шапка: логотип слева, затем заголовок */
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-  .header .logo {
-    height: 40px;
-    width: auto;
-    flex-shrink: 0;
-    display: block;
-  }
-  .header h1 {
-    font-size: 20px;
-    margin: 0;
+  .content { padding: 18px 24px 24px; }
+
+  /* ФОРМА */
+  .form-section {
+    margin-bottom: 14px;
+    padding: 14px 18px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
   }
 
-  label { display: block; font-weight: 600; margin: 12px 0 6px; }
+  .form-section h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  label {
+    display: block;
+    font-weight: 500;
+    margin: 8px 0 5px;
+    font-size: 12px;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
   input[type="text"], textarea {
     width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-sizing: border-box;
+    padding: 9px 12px;
+    background: #fff;
+    border: 1px solid rgba(158, 67, 250, 0.3);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: #333;
+    font-family: 'Montserrat', Arial, sans-serif;
+    transition: var(--transition);
   }
-  textarea { resize: vertical; min-height: 80px; }
+
+  input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--violet);
+    box-shadow: 0 0 0 2px rgba(158, 67, 250, 0.2);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  /* КНОПКИ */
+  .button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
   button {
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
+    flex: 1;
+    padding: 10px;
     border: none;
-    border-radius: 8px;
-    margin-top: 12px;
+    border-radius: var(--radius-lg);
     font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    transition: var(--transition);
+    font-family: 'Montserrat', Arial, sans-serif;
+    background: var(--grad-btn);
+    background-size: 200%;
+    color: white;
+    box-shadow: 0 4px 15px rgba(160, 68, 255, 0.3);
   }
-  #btnPhoto { background: #2fc6f6; color: #fff; }
-  #btnGallery { background: #7a8bff; color: #fff; }
-  #btnSend { background: #1db954; color: #fff; }
-  button:disabled { opacity: 0.6; }
-  #info { margin-top: 8px; font-size: 13px; color: #666; }
+
+  button:hover:not(:disabled) { background-position: right; }
+
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  #info {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+  }
 
   /* Сетка превью */
   #previews {
@@ -68,9 +243,10 @@
   .thumb {
     position: relative;
     padding-top: 100%;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     overflow: hidden;
-    background: #e5e7eb;
+    background: #222;
+    border: 1px solid var(--border);
   }
   .thumb img {
     position: absolute;
@@ -84,66 +260,130 @@
     position: absolute;
     top: 4px;
     right: 4px;
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     padding: 0;
     margin: 0;
     border: none;
     border-radius: 50%;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.7);
     color: #fff;
-    font-size: 16px;
-    line-height: 26px;
+    font-size: 14px;
+    line-height: 24px;
     text-align: center;
     cursor: pointer;
     font-weight: 700;
+    flex: none;
+    text-transform: none;
+    letter-spacing: 0;
+    box-shadow: none;
   }
+  .thumb .del:hover { background: rgba(0,0,0,0.9); }
 
   #status {
-    margin-top: 16px; padding: 12px; border-radius: 8px;
-    font-size: 14px; display: none; white-space: pre-wrap;
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    display: none;
+    white-space: pre-wrap;
+    border: 1px solid transparent;
   }
-  .ok { background: #d4f5dd; color: #10622a; }
-  .err { background: #fad4d4; color: #7a1414; }
+  .ok {
+    background: rgba(69, 150, 71, 0.15);
+    color: #a8e6b0;
+    border-color: rgba(69, 150, 71, 0.5);
+  }
+  .err {
+    background: rgba(220, 53, 69, 0.12);
+    color: #ff9ea8;
+    border-color: rgba(220, 53, 69, 0.5);
+  }
+
+  /* АДАПТИВ */
+  @media (max-width: 600px) {
+    .site-header { flex-direction: column; text-align: center; padding: 10px; }
+    .site-contacts { text-align: center; margin-top: 8px; }
+    .content { padding: 14px 16px 20px; }
+    .form-section { padding: 12px 14px; }
+  }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <img class="logo"
-       src="https://github.com/mironov62-svg/refund/blob/main/lpu.png?raw=true"
-       alt="Логотип">
-  <h1>Возврат МИ в ЛУ</h1>
+<div class="page">
+  <div class="container">
+
+    <!-- ШАПКА -->
+    <header class="site-header">
+      <a class="site-logo" href="https://grandmedtech.ru/" target="_blank">
+        <img src="https://mironov62-svg.github.io/SID_DSH/assets/logo.png" alt="ГрандМедТех">
+        <div class="site-logo-text">
+          <b>ГрандМедТех</b>
+          <span>Сервис медтехники</span>
+        </div>
+      </a>
+      <div class="site-contacts">
+        <a class="site-phone" href="tel:+73833110232">8 (383) 311-02-32</a>
+        <a class="site-mail" href="mailto:gmt@gmt54.ru">gmt@gmt54.ru</a>
+      </div>
+    </header>
+
+    <!-- ЗАГОЛОВОК -->
+    <div class="header-block">
+      <h2>Возврат МИ в ЛУ</h2>
+      <p>Укажите ID сделки, приложите фото и комментарий — данные будут отправлены в Битрикс24.</p>
+    </div>
+
+    <div class="content">
+
+      <!-- ID СДЕЛКИ -->
+      <div class="form-section">
+        <h3>📋 ID сделки</h3>
+        <label for="dealId">Номер сделки в Битрикс24</label>
+        <input type="text" id="dealId" inputmode="numeric" placeholder="Например: 12345" autocomplete="off">
+      </div>
+
+      <!-- ФОТО -->
+      <div class="form-section">
+        <h3>📷 Фотографии</h3>
+        <div class="button-group">
+          <button id="btnPhoto" type="button">Сделать фото</button>
+          <button id="btnGallery" type="button">Из галереи</button>
+        </div>
+        <div id="previews"></div>
+        <div id="info"></div>
+      </div>
+
+      <!-- КОММЕНТАРИЙ -->
+      <div class="form-section">
+        <h3>💬 Комментарий</h3>
+        <label for="comment">Текст комментария</label>
+        <textarea id="comment" placeholder="Введите текст комментария"></textarea>
+      </div>
+
+      <!-- ОТПРАВКА -->
+      <div class="button-group">
+        <button id="btnSend" type="button">Отправить в Битрикс24</button>
+      </div>
+
+      <div id="status"></div>
+
+    </div>
+  </div>
 </div>
-
-<label for="dealId">ID сделки</label>
-<input type="text" id="dealId" inputmode="numeric" placeholder="Например: 12345">
-
-<button id="btnPhoto" type="button">📷 Сделать фото</button>
-<button id="btnGallery" type="button">🖼 Выбрать из галереи</button>
-<div id="previews"></div>
-<div id="info"></div>
-
-<label for="comment">Комментарий</label>
-<textarea id="comment" placeholder="Введите текст комментария"></textarea>
-
-<button id="btnSend" type="button">Отправить в Битрикс24</button>
-
-<div id="status"></div>
 
 <script>
 // ==== НАСТРОЙКИ ====
 const WEBHOOK = "https://b24-964ige.bitrix24.ru/rest/1/v2wlsum3d4zu1ceb/";
 const PORTAL = "https://b24-964ige.bitrix24.ru";
-const MANAGER_ID = "240"; // ID сотрудника для уведомления
-const MAX_SIZE = 300 * 1024; // 300 КБ на файл
-const FIXED_PHRASE = "Возврат МИ в ЛУ"; // первая строка комментария
+const MANAGER_ID = "240";
+const MAX_SIZE = 300 * 1024;
+const FIXED_PHRASE = "Возврат МИ в ЛУ";
 
-// Пользовательское поле сделки, которое нужно ставить в "Да"
 const UF_FIELD = "UF_CRM_1791016249";
-const UF_VALUE_YES = 1; // 1 = "Да" для поля типа "Список"
+const UF_VALUE_YES = 1;
 
-// Максимум фото за раз (чтобы не превысить лимиты Битрикс24)
 const MAX_PHOTOS = 5;
 
 // ==== ЭЛЕМЕНТЫ ====
@@ -156,14 +396,10 @@ const previewsEl = $("previews");
 const info = $("info");
 const status = $("status");
 
-// Массив прикреплённых фото: { base64, name, size }
 let photos = [];
-
-// Флаг, что идёт обработка файла — блокирует кнопки фото
 let isProcessing = false;
 
 // ==== ВЫБОР ФОТО ====
-// capture = "environment" — открыть камеру; capture = null — галерея
 function pickPhoto(useCamera) {
   if (isProcessing) return;
   if (photos.length >= MAX_PHOTOS) {
@@ -184,7 +420,6 @@ function pickPhoto(useCamera) {
       return;
     }
 
-    // Блокируем кнопки на время обработки
     isProcessing = true;
     btnPhoto.disabled = true;
     btnGallery.disabled = true;
@@ -213,7 +448,6 @@ function pickPhoto(useCamera) {
 btnPhoto.addEventListener("click", () => pickPhoto(true));
 btnGallery.addEventListener("click", () => pickPhoto(false));
 
-// Отрисовка превью-сетки
 function renderPreviews() {
   previewsEl.innerHTML = "";
   photos.forEach((p, idx) => {
@@ -241,7 +475,6 @@ function renderPreviews() {
   });
 }
 
-// Сжатие изображения через canvas
 function compressImage(file, maxSize = MAX_SIZE) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -250,7 +483,6 @@ function compressImage(file, maxSize = MAX_SIZE) {
       img.onload = () => {
         let { width, height } = img;
 
-        // Ограничиваем стороны (max 1600px)
         const MAX_DIM = 1600;
         if (width > MAX_DIM || height > MAX_DIM) {
           if (width > height) {
@@ -268,7 +500,6 @@ function compressImage(file, maxSize = MAX_SIZE) {
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Подбираем quality, чтобы уложиться в 300 КБ
         let quality = 0.85;
         let dataUrl = canvas.toDataURL("image/jpeg", quality);
 
@@ -304,24 +535,20 @@ btnSend.addEventListener("click", async () => {
   showStatus("Отправка...", true);
 
   try {
-    // Фиксированная первая строка + комментарий пользователя
     const fullComment = comment
       ? FIXED_PHRASE + "\n" + comment
       : FIXED_PHRASE;
 
-    // Формируем объект fields (Битрикс24 ожидает вложенный объект)
     const fields = {
       ENTITY_TYPE: "deal",
       ENTITY_ID: dealId,
       COMMENT: fullComment
     };
 
-    // FILES — массив пар [имя_файла, base64_строка]
     if (photos.length > 0) {
       fields.FILES = photos.map(p => [p.name, p.base64]);
     }
 
-    // 1) Добавляем комментарий в таймлайн сделки
     const resp = await fetch(WEBHOOK + "crm.timeline.comment.add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -335,7 +562,6 @@ btnSend.addEventListener("click", async () => {
       return;
     }
 
-    // 2) Обновляем пользовательское поле UF_CRM_1791016249 = Да (1)
     let ufNote = "";
     try {
       const ufResp = await fetch(WEBHOOK + "crm.deal.update", {
@@ -358,7 +584,6 @@ btnSend.addEventListener("click", async () => {
       ufNote = `\n⚠️ Поле МИ возврат не обновлено: ${e.message}`;
     }
 
-    // 3) Отправляем уведомление сотруднику
     const dealLink = `${PORTAL}/crm/deal/details/${dealId}/`;
     const notifyText = `МИ возвращено.\nСделка: ${dealLink}`;
 
@@ -385,7 +610,6 @@ btnSend.addEventListener("click", async () => {
 
     showStatus("✅ Комментарий добавлен в сделку " + dealId + ufNote + notifyNote, true);
 
-    // Сброс формы
     photos = [];
     renderPreviews();
     info.textContent = "";
