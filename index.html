@@ -155,6 +155,18 @@
     padding: 12px 20px 10px;
     text-align: center;
     border-bottom: 1px solid rgba(255,255,255,0.05);
+    position: relative;
+  }
+
+  .header-block .title-icon {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 40px;
+    width: auto;
+    display: block;
+    margin-left: 8px;
   }
 
   .header-block h2 {
@@ -162,14 +174,6 @@
     margin-bottom: 4px;
     color: #fff;
     font-weight: 600;
-  }
-
-  .header-block p {
-    font-size: 11.5px;
-    color: var(--text-soft);
-    line-height: 1.3;
-    max-width: 600px;
-    margin: 0 auto;
   }
 
   .content { padding: 18px 24px 24px; }
@@ -349,6 +353,9 @@
 
     .content { padding: 14px 16px 20px; }
     .form-section { padding: 12px 14px; }
+
+    .header-block h2 { font-size: 17px; }
+    .header-block .title-icon { height: 32px; margin-left: 6px; }
   }
 
   @media (max-width: 380px) {
@@ -356,6 +363,9 @@
     .site-phone { font-size: 10px; }
     .site-mail { font-size: 8px; }
     .site-logo img { height: 22px; }
+
+    .header-block h2 { font-size: 15px; }
+    .header-block .title-icon { height: 26px; margin-left: 4px; }
   }
 </style>
 </head>
@@ -381,8 +391,8 @@
 
     <!-- ЗАГОЛОВОК -->
     <div class="header-block">
+      <img class="title-icon" src="https://github.com/mironov62-svg/refund/blob/main/lpu.png?raw=true" alt="ЛПУ">
       <h2>Возврат МИ в ЛУ</h2>
-      <p>Укажите ID сделки, приложите фото и комментарий — данные будут отправлены в Битрикс24.</p>
     </div>
 
     <div class="content">
