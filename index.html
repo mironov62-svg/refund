@@ -70,54 +70,85 @@
     overflow: visible;
   }
 
-  /* ШАПКА */
+  /* ШАПКА — сжата по горизонтали, всегда одна строка */
   .site-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 15px;
-    padding: 10px 24px;
+    gap: 8px;
+    padding: 8px 14px;
     background: var(--grad-header);
     border-bottom: 1px solid rgba(255,255,255,0.1);
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    flex-wrap: nowrap;
+    white-space: nowrap;
   }
 
   .site-logo {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     text-decoration: none;
     color: #fff;
+    min-width: 0;
+    flex-shrink: 1;
   }
 
   .site-logo img {
-    height: 40px;
+    height: 30px;
     width: auto;
     display: block;
+    flex-shrink: 0;
+  }
+
+  .site-logo-text {
+    min-width: 0;
+    overflow: hidden;
   }
 
   .site-logo-text b {
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     display: block;
     line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .site-logo-text span {
-    font-size: 10px;
+    font-size: 9px;
     opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
   }
 
-  .site-contacts { text-align: right; }
+  .site-contacts {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
   .site-contacts a {
     display: block;
     text-decoration: none;
     color: #fff;
-    line-height: 1.2;
+    line-height: 1.15;
+    white-space: nowrap;
   }
-  .site-phone { color: var(--phone); font-weight: 600; font-size: 16px; }
-  .site-mail { font-size: 13px; opacity: 0.9; }
+
+  .site-phone {
+    color: var(--phone);
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .site-mail {
+    font-size: 10px;
+    opacity: 0.9;
+  }
 
   /* ЗАГОЛОВОК */
   .header-block {
@@ -197,7 +228,7 @@
     min-height: 80px;
   }
 
-  /* КНОПКИ */
+  /* КНОПКИ — единый стиль */
   .button-group {
     display: flex;
     gap: 10px;
@@ -302,10 +333,29 @@
 
   /* АДАПТИВ */
   @media (max-width: 600px) {
-    .site-header { flex-direction: column; text-align: center; padding: 10px; }
-    .site-contacts { text-align: center; margin-top: 8px; }
+    .site-header {
+      flex-direction: row;
+      text-align: left;
+      padding: 6px 10px;
+      gap: 6px;
+    }
+
+    .site-logo img { height: 26px; }
+    .site-logo-text b { font-size: 11px; }
+    .site-logo-text span { display: none; }
+
+    .site-phone { font-size: 11px; }
+    .site-mail { font-size: 9px; }
+
     .content { padding: 14px 16px 20px; }
     .form-section { padding: 12px 14px; }
+  }
+
+  @media (max-width: 380px) {
+    .site-logo-text b { font-size: 10px; }
+    .site-phone { font-size: 10px; }
+    .site-mail { font-size: 8px; }
+    .site-logo img { height: 22px; }
   }
 </style>
 </head>
