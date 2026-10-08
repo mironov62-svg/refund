@@ -434,17 +434,91 @@
 </div>
 
 <script>
-// ==== НАСТРОЙКИ ====
-const WEBHOOK = "https://b24-964ige.bitrix24.ru/rest/1/v2wlsum3d4zu1ceb/";
-const PORTAL = "https://b24-964ige.bitrix24.ru";
-const MANAGER_ID = "";
-const MAX_SIZE = 300 * 1024;
+// ============================================================
+//  НАСТРОЙКИ
+//  Здесь НЕТ вебхука Битрикс24. Все запросы идут через
+//  серверный прокси api.gmtnsk.ru, который хранит вебхук.
+// ============================================================
+const PROXY  = "https://api.gmtnsk.ru/proxy.php";
+const APP    = "refund";                       // имя приложения (см. config.php на сервере)
+const PORTAL = "https://b24-964ige.bitrix24.ru";  // только для формирования ссылок
+
+const MAX_SIZE = 300 * 1024;                   // лимит размера фото после сжатия
 const FIXED_PHRASE = "Возврат МИ в ЛУ";
 
 const UF_FIELD = "UF_CRM_1791016249";
 const UF_VALUE_YES = 1;
 
 const MAX_PHOTOS = 5;
+
+// ============================================================
+//  Универсальный вызов метода Битрикс24 через прокси
+//
+//    await b24("crm.deal.get",  { id: 123 })          → GET
+//    await b24("crm.deal.update", { id: 123, fields: {...} }) → POST
+//
+//  Метод POST/GET выбирается по соглашению:
+//  методы, изменяющие данные (comment.add, deal.update,
+//  im.message.add, tasks.task.add и т.п.) идут POST.
+//  Методы-читатели (deal.get, deal.list, deal.fields,
+//  contact.get и т.п.) — GET.
+// ============================================================
+
+const POST_METHODS_PREFIX = [
+  "crm.timeline.comment.add",
+  "crm.deal.update",
+  "crm.deal.add",
+  "crm.contact.update",
+  "crm.contact.add",
+  "crm.timeline.comment.update",
+  "im.message.add",
+  "tasks.task.add",
+  "tasks.task.update"
+];
+
+function isPostMethod(method) {
+  return POST_METHODS_PREFIX.indexOf(method) !== -1;
+}
+
+async function b24(method, params = {}) {
+  const url = new URL(PROXY);
+  url.searchParams.set("app", APP);
+  url.searchParams.set("method", method);
+
+  const usePost = isPostMethod(method);
+
+  // Для GET — параметры уходят в query string
+  if (!usePost) {
+    for (const [k, v] of Object.entries(params)) {
+      url.searchParams.set(k, v);
+    }
+  }
+
+  const response = await fetch(url.toString(), {
+    method: usePost ? "POST" : "GET",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    },
+    body: usePost ? JSON.stringify(params) : undefined
+  });
+
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    throw new Error(`Сервер вернул не JSON (HTTP ${response.status})`);
+  }
+
+  if (data && data.error) {
+    const msg = data.error_description
+      ? `${data.error}: ${data.error_description}`
+      : data.error;
+    throw new Error(msg);
+  }
+
+  return data.result;
+}
 
 // ==== ЭЛЕМЕНТЫ ====
 const $ = id => document.getElementById(id);
@@ -609,67 +683,25 @@ btnSend.addEventListener("click", async () => {
       fields.FILES = photos.map(p => [p.name, p.base64]);
     }
 
-    const resp = await fetch(WEBHOOK + "crm.timeline.comment.add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fields: fields })
-    });
+    // 1. Добавляем комментарий к сделке (с фото, если есть)
+    await b24("crm.timeline.comment.add", { fields: fields });
 
-    const data = await resp.json();
-
-    if (data.error) {
-      showStatus("Ошибка Битрикс24: " + data.error_description, false);
-      return;
-    }
-
+    // 2. Обновляем пользовательское поле UF_CRM_1791016249 = 1
     let ufNote = "";
     try {
-      const ufResp = await fetch(WEBHOOK + "crm.deal.update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: dealId,
-          fields: { [UF_FIELD]: UF_VALUE_YES }
-        })
+      await b24("crm.deal.update", {
+        id: dealId,
+        fields: { [UF_FIELD]: UF_VALUE_YES }
       });
-      const ufData = await ufResp.json();
-      if (ufData.error) {
-        console.warn("Не удалось обновить поле " + UF_FIELD + ":", ufData.error_description);
-        ufNote = `\n⚠️ Поле МИ возврат не обновлено: ${ufData.error_description}`;
-      } else {
-        ufNote = `\n✅ Поле МИ возврат=Да`;
-      }
+      ufNote = "\n✅ Поле МИ возврат=Да";
     } catch (e) {
-      console.warn("Ошибка обновления поля:", e);
+      console.warn("Не удалось обновить поле " + UF_FIELD + ":", e);
       ufNote = `\n⚠️ Поле МИ возврат не обновлено: ${e.message}`;
     }
 
-    const dealLink = `${PORTAL}/crm/deal/details/${dealId}/`;
-    const notifyText = `МИ возвращено.\nСделка: ${dealLink}`;
+    showStatus("✅ Комментарий добавлен в сделку " + dealId + ufNote, true);
 
-    let notifyNote = "";
-    try {
-      const notifyResp = await fetch(WEBHOOK + "im.message.add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          DIALOG_ID: MANAGER_ID,
-          MESSAGE: notifyText,
-          URL_PREVIEW: "Y"
-        })
-      });
-      const notifyData = await notifyResp.json();
-      if (notifyData.error) {
-        console.warn("Не удалось отправить уведомление:", notifyData.error_description);
-        notifyNote = `\n⚠️ Уведомление не отправлено: ${notifyData.error_description}`;
-      }
-    } catch (e) {
-      console.warn("Ошибка отправки уведомления:", e);
-      notifyNote = `\n⚠️ Уведомление не отправлено: ${e.message}`;
-    }
-
-    showStatus("✅ Комментарий добавлен в сделку " + dealId + ufNote + notifyNote, true);
-
+    // Сброс формы
     photos = [];
     renderPreviews();
     info.textContent = "";
@@ -677,7 +709,7 @@ btnSend.addEventListener("click", async () => {
 
   } catch (err) {
     console.error(err);
-    showStatus("Сетевая ошибка: " + err.message, false);
+    showStatus("Ошибка: " + err.message, false);
   } finally {
     btnSend.disabled = false;
   }
