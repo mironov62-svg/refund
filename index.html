@@ -2,725 +2,713 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Возврат МИ в ЛУ · ГрандМедТех</title>
-
-<link rel="icon" href="https://mironov62-svg.github.io/SID_DSH/assets/favicon.png" type="image/png">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700%7CPoppins:400,500,600,700&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Заявки сервис</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f0f2f5; color: #1a1a1a; padding: 12px; padding-bottom: 30px;
+    }
+    .header-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 16px; background: #fff; padding: 10px 16px;
+        border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-title { font-size: 18px; font-weight: 600; color: #333; }
+    .refresh-btn-text {
+        background: #e9ecef; color: #2d6cdf; border: none; padding: 8px 12px;
+        border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+        display: flex; align-items: center; gap: 4px;
+    }
+    .refresh-btn-text:active { background: #dfe3e6; }
 
-  :root {
-    --phone: #ffad00;
-    --violet: #9e43fa;
-    --violet-2: #a044ff;
-    --success: #459647;
-    --bg: #101010;
-    --bg-panel: rgba(0, 0, 0, 0.45);
-    --bg-panel-2: #17151c;
-    --text: #ffffff;
-    --text-soft: rgba(255, 255, 255, 0.78);
-    --text-muted: rgba(255, 255, 255, 0.55);
-    --border: rgba(255, 255, 255, 0.12);
-    --radius-xl: 15px;
-    --radius-md: 8px;
-    --radius-lg: 10px;
+    h2 {
+        font-size: 15px; font-weight: 600; margin: 16px 0 8px; color: #555;
+        text-transform: uppercase; letter-spacing: 0.5px;
+        display: flex; align-items: center; gap: 8px;
+    }
+    h2:first-of-type { margin-top: 0; }
+    .badge {
+        background: #eee; color: #666; font-size: 12px; padding: 2px 8px;
+        border-radius: 10px; font-weight: normal;
+    }
+    .card {
+        background: #fff; border-radius: 12px; padding: 14px 16px;
+        margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        cursor: pointer; transition: transform 0.1s;
+        border-left: 4px solid transparent;
+    }
+    .card:active { transform: scale(0.98); }
+    .card-title { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
+    .card-meta {
+        font-size: 13px; color: #888; display: flex; align-items: center;
+        flex-wrap: wrap; gap: 6px;
+    }
+    .card-addr { color: #666; }
 
-    --grad-header: linear-gradient(272deg, rgb(84, 99, 130) 0%, rgb(92, 66, 131) 98%);
-    --grad-btn: linear-gradient(to right, #6a3093 0%, #a044ff 51%, #6a3093 100%);
-    --grad-stepper: linear-gradient(135deg, #6a3093 0%, #a044ff 100%);
+    #section-stage1 .card { border-left-color: #e6e600; }
+    #section-stage2 .card { border-left-color: #f5a623; background: #fffdf5; }
+    #section-stage3 .card { border-left-color: #ffd54f; background: #fff8f3; }
+    #section-stage4 .card { opacity: 0.75; border-left-color: #00d800; }
 
-    --box-glow: rgb(119 54 222) -1px 11px 35px -20px, rgb(152 62 212) 1px 1px 20px -30px;
-    --transition: all 0.3s ease;
-  }
+    .modal-overlay {
+        display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5); z-index: 100; align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+        background: #fff; width: 100%; max-width: 600px; max-height: 90vh;
+        border-radius: 20px 20px 0 0; overflow-y: auto; padding: 20px 16px 32px;
+        animation: slideUp 0.2s ease-out;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-close {
+        float: right; background: #eee; border: none; width: 36px; height: 36px;
+        border-radius: 50%; font-size: 18px; cursor: pointer; line-height: 36px;
+        text-align: center; color: #666;
+    }
+    .modal h3 { font-size: 20px; margin-bottom: 16px; padding-right: 44px; }
+    .field { margin-bottom: 12px; }
+    .field-label {
+        font-size: 12px; color: #999; text-transform: uppercase;
+        letter-spacing: 0.3px; margin-bottom: 2px;
+    }
+    .field-value { font-size: 15px; line-height: 1.4; word-break: break-word; }
+    .field-value.multiline { white-space: pre-wrap; }
 
-  body {
-    font-family: 'Montserrat', Arial, sans-serif;
-    font-size: 14px;
-    background-color: var(--bg);
-    background-image: radial-gradient(circle at 50% 0%, rgba(106, 48, 147, 0.4) 0%, transparent 60%);
-    background-attachment: fixed;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    color: var(--text);
-  }
+    .files-list { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+    .files-list a { color: #2d6cdf; font-size: 14px; text-decoration: none; }
+    .files-list a:active { opacity: 0.7; }
 
-  .page {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 15px 20px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
+    /* Кнопки стадий */
+    .stage-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .stage-btn {
+        display: flex; justify-content: space-between; align-items: center;
+        width: 100%; padding: 12px 14px; border: 1px solid #e0e0e0;
+        border-radius: 10px; background: #fff; font-size: 15px; font-weight: 500;
+        cursor: pointer; text-align: left; color: #333; transition: opacity 0.2s;
+    }
+    .stage-btn:active { opacity: 0.8; }
+    .stage-btn.current { border-width: 2px; font-weight: 700; cursor: default; }
+    
+    .stage-btn[data-stage="1"] { border-color: #e6e600; color: #333; }
+    .stage-btn[data-stage="1"].current { background: #e6e600; color: #000; }
+    
+    .stage-btn[data-stage="6"] { border-color: #f5a623; color: #333; }
+    .stage-btn[data-stage="6"].current { background: #f5a623; color: #fff; }
+    
+    .stage-btn[data-stage="3"] { border-color: #ffd54f; color: #333; }
+    .stage-btn[data-stage="3"].current { background: #ffd54f; color: #000; }
+    
+    .stage-btn[data-stage="5"] { border-color: #00d800; color: #333; }
+    .stage-btn[data-stage="5"].current { background: #00d800; color: #fff; }
 
-  .container {
-    width: 100%;
-    max-width: 900px;
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
-    backdrop-filter: blur(10px);
-    box-shadow: var(--box-glow);
-    overflow: visible;
-  }
+    .stage-btn:disabled { cursor: default; }
 
-  /* ШАПКА — сжата по горизонтали, всегда одна строка */
-  .site-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 8px 14px;
-    background: var(--grad-header);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    flex-wrap: nowrap;
-    white-space: nowrap;
-  }
+    .loading { text-align: center; padding: 40px; color: #999; }
+    .error-msg {
+        background: #fee; color: #c00; padding: 12px; border-radius: 8px;
+        margin: 12px 0; font-size: 14px;
+    }
+    .empty { text-align: center; padding: 16px; color: #aaa; font-size: 14px; }
 
-  .site-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    color: #fff;
-    min-width: 0;
-    flex-shrink: 1;
-  }
+    .toast {
+        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+        background: #333; color: #fff; padding: 10px 20px; border-radius: 20px;
+        font-size: 14px; z-index: 200; opacity: 0; transition: opacity 0.3s;
+        pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
 
-  .site-logo img {
-    height: 30px;
-    width: auto;
-    display: block;
-    flex-shrink: 0;
-  }
-
-  .site-logo-text {
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .site-logo-text b {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    display: block;
-    line-height: 1.1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .site-logo-text span {
-    font-size: 9px;
-    opacity: 0.8;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-  }
-
-  .site-contacts {
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  .site-contacts a {
-    display: block;
-    text-decoration: none;
-    color: #fff;
-    line-height: 1.15;
-    white-space: nowrap;
-  }
-
-  .site-phone {
-    color: var(--phone);
-    font-weight: 600;
-    font-size: 12px;
-  }
-
-  .site-mail {
-    font-size: 10px;
-    opacity: 0.9;
-  }
-
-  /* ЗАГОЛОВОК */
-  .header-block {
-    padding: 12px 20px 10px;
-    text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    position: relative;
-  }
-
-  .header-block .title-icon {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 40px;
-    width: auto;
-    display: block;
-    margin-left: 8px;
-  }
-
-  .header-block h2 {
-    font-size: 19px;
-    margin-bottom: 4px;
-    color: #fff;
-    font-weight: 600;
-  }
-
-  .content { padding: 18px 24px 24px; }
-
-  /* ФОРМА */
-  .form-section {
-    margin-bottom: 14px;
-    padding: 14px 18px;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
-  }
-
-  .form-section h3 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 12px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    letter-spacing: 0.5px;
-  }
-
-  label {
-    display: block;
-    font-weight: 500;
-    margin: 8px 0 5px;
-    font-size: 12px;
-    color: var(--text-soft);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
-
-  input[type="text"], textarea {
-    width: 100%;
-    padding: 9px 12px;
-    background: #fff;
-    border: 1px solid rgba(158, 67, 250, 0.3);
-    border-radius: var(--radius-md);
-    font-size: 14px;
-    color: #333;
-    font-family: 'Montserrat', Arial, sans-serif;
-    transition: var(--transition);
-  }
-
-  input[type="text"]:focus, textarea:focus {
-    outline: none;
-    border-color: var(--violet);
-    box-shadow: 0 0 0 2px rgba(158, 67, 250, 0.2);
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 80px;
-  }
-
-  /* КНОПКИ — единый стиль */
-  .button-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  button {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: var(--radius-lg);
-    font-weight: 600;
-    cursor: pointer;
-    text-transform: uppercase;
-    font-size: 11px;
-    letter-spacing: 0.4px;
-    transition: var(--transition);
-    font-family: 'Montserrat', Arial, sans-serif;
-    background: var(--grad-btn);
-    background-size: 200%;
-    color: white;
-    box-shadow: 0 4px 15px rgba(160, 68, 255, 0.3);
-  }
-
-  button:hover:not(:disabled) { background-position: right; }
-
-  button:disabled { opacity: 0.6; cursor: not-allowed; }
-
-  #info {
-    margin-top: 8px;
-    font-size: 12px;
-    color: var(--text-muted);
-    text-align: center;
-  }
-
-  /* Сетка превью */
-  #previews {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-top: 10px;
-  }
-  .thumb {
-    position: relative;
-    padding-top: 100%;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    background: #222;
-    border: 1px solid var(--border);
-  }
-  .thumb img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .thumb .del {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    margin: 0;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.7);
-    color: #fff;
-    font-size: 14px;
-    line-height: 24px;
-    text-align: center;
-    cursor: pointer;
-    font-weight: 700;
-    flex: none;
-    text-transform: none;
-    letter-spacing: 0;
-    box-shadow: none;
-  }
-  .thumb .del:hover { background: rgba(0,0,0,0.9); }
-
-  #status {
-    margin-top: 16px;
-    padding: 12px 16px;
-    border-radius: var(--radius-md);
-    font-size: 13px;
-    display: none;
-    white-space: pre-wrap;
-    border: 1px solid transparent;
-  }
-  .ok {
-    background: rgba(69, 150, 71, 0.15);
-    color: #a8e6b0;
-    border-color: rgba(69, 150, 71, 0.5);
-  }
-  .err {
-    background: rgba(220, 53, 69, 0.12);
-    color: #ff9ea8;
-    border-color: rgba(220, 53, 69, 0.5);
-  }
-
-  /* АДАПТИВ */
-  @media (max-width: 600px) {
-    .site-header {
-      flex-direction: row;
-      text-align: left;
-      padding: 6px 10px;
-      gap: 6px;
+    /* Поле ввода текста */
+    .btn-add-work {
+        background: #e3f2fd; color: #1565c0; border: 1px dashed #2d6cdf;
+        padding: 10px; width: 100%; border-radius: 8px; font-size: 14px;
+        font-weight: 600; cursor: pointer; margin-top: 4px;
+    }
+    .btn-add-work:active { background: #bbdefb; }
+    
+    .edit-textarea {
+        width: 100%; padding: 10px; border: 1px solid #2d6cdf; border-radius: 8px;
+        font-family: inherit; font-size: 15px; resize: vertical; margin-top: 4px;
+        outline: none;
+    }
+    .btn-save {
+        flex: 1; background: #28a745; color: #fff; border: none;
+        padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer;
+    }
+    .btn-cancel {
+        flex: 1; background: #f0f2f5; color: #333; border: none;
+        padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer;
     }
 
-    .site-logo img { height: 26px; }
-    .site-logo-text b { font-size: 11px; }
-    .site-logo-text span { display: none; }
+    /* Кнопка добавления фото */
+    .btn-add-file {
+        background: #fff; color: #2d6cdf; border: 1px dashed #2d6cdf;
+        padding: 8px 12px; border-radius: 8px; font-size: 14px;
+        font-weight: 600; cursor: pointer; display: inline-flex;
+        align-items: center; gap: 6px; margin-top: 4px;
+    }
+    .btn-add-file:active { background: #f5f5f5; }
+    .btn-add-file:disabled { opacity: 0.6; }
 
-    .site-phone { font-size: 11px; }
-    .site-mail { font-size: 9px; }
-
-    .content { padding: 14px 16px 20px; }
-    .form-section { padding: 12px 14px; }
-
-    .header-block h2 { font-size: 17px; }
-    .header-block .title-icon { height: 32px; margin-left: 6px; }
-  }
-
-  @media (max-width: 380px) {
-    .site-logo-text b { font-size: 10px; }
-    .site-phone { font-size: 10px; }
-    .site-mail { font-size: 8px; }
-    .site-logo img { height: 22px; }
-
-    .header-block h2 { font-size: 15px; }
-    .header-block .title-icon { height: 26px; margin-left: 4px; }
-  }
+    /* Внимание / Ошибка в модалке */
+    .validation-error {
+        background: #fee; color: #c00; padding: 12px; border-radius: 8px;
+        font-size: 14px; margin-top: 16px; margin-bottom: 8px; font-weight: 500;
+        border-left: 4px solid #c00;
+    }
 </style>
 </head>
 <body>
 
-<div class="page">
-  <div class="container">
-
-    <!-- ШАПКА -->
-    <header class="site-header">
-      <a class="site-logo" href="https://grandmedtech.ru/" target="_blank">
-        <img src="https://mironov62-svg.github.io/SID_DSH/assets/logo.png" alt="ГрандМедТех">
-        <div class="site-logo-text">
-          <b>ГрандМедТех</b>
-          <span>Сервис медтехники</span>
+<div id="app">
+    <div class="header-bar">
+        <div class="header-left">
+            <div class="header-title">Заявки сервис</div>
         </div>
-      </a>
-      <div class="site-contacts">
-        <a class="site-phone" href="tel:+73833110232">8 (383) 311-02-32</a>
-        <a class="site-mail" href="mailto:gmt@gmt54.ru">gmt@gmt54.ru</a>
-      </div>
-    </header>
-
-    <!-- ЗАГОЛОВОК -->
-    <div class="header-block">
-      <img class="title-icon" src="https://github.com/mironov62-svg/refund/blob/main/lpu.png?raw=true" alt="ЛПУ">
-      <h2>Возврат МИ в ЛУ</h2>
+        <button class="refresh-btn-text" onclick="loadDeals()">
+            <span style="font-size:16px;">⟳</span> Обновить
+        </button>
     </div>
 
-    <div class="content">
+    <div id="loading" class="loading">Загрузка заявок…</div>
+    <div id="error" class="error-msg" style="display:none;"></div>
 
-      <!-- ID СДЕЛКИ -->
-      <div class="form-section">
-        <h3>📋 ID сделки</h3>
-        <label for="dealId">Номер сделки в Битрикс24</label>
-        <input type="text" id="dealId" inputmode="numeric" placeholder="Например: 12345" autocomplete="off">
-      </div>
-
-      <!-- ФОТО -->
-      <div class="form-section">
-        <h3>📷 Фотографии</h3>
-        <div class="button-group">
-          <button id="btnPhoto" type="button">Сделать фото</button>
-          <button id="btnGallery" type="button">Из галереи</button>
+    <div id="content" style="display:none;">
+        <div id="section-stage1">
+            <h2>Заявка оформлена <span class="badge" id="badge-stage1">0</span></h2>
+            <div id="list-stage1"></div>
         </div>
-        <div id="previews"></div>
-        <div id="info"></div>
-      </div>
-
-      <!-- КОММЕНТАРИЙ -->
-      <div class="form-section">
-        <h3>💬 Комментарий</h3>
-        <label for="comment">Текст комментария</label>
-        <textarea id="comment" placeholder="Введите текст комментария"></textarea>
-      </div>
-
-      <!-- ОТПРАВКА -->
-      <div class="button-group">
-        <button id="btnSend" type="button">Отправить в Битрикс24</button>
-      </div>
-
-      <div id="status"></div>
-
+        <div id="section-stage2">
+            <h2>Принято в работу <span class="badge" id="badge-stage2">0</span></h2>
+            <div id="list-stage2"></div>
+        </div>
+        <div id="section-stage3">
+            <h2>В работе <span class="badge" id="badge-stage3">0</span></h2>
+            <div id="list-stage3"></div>
+        </div>
+        <div id="section-stage4">
+            <h2>Готово <span class="badge" id="badge-stage4">0</span></h2>
+            <div id="list-stage4"></div>
+        </div>
     </div>
-  </div>
 </div>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 // ============================================================
-//  НАСТРОЙКИ
-//  Здесь НЕТ вебхука Битрикс24. Все запросы идут через
-//  серверный прокси api.gmtnsk.ru, который хранит вебхук.
+// НАСТРОЙКИ — ВПИШИТЕ СВОИ ЗНАЧЕНИЯ
 // ============================================================
-const PROXY  = "https://api.gmtnsk.ru/proxy.php";
-const APP    = "refund";                       // имя приложения (см. config.php на сервере)
-const PORTAL = "https://b24-964ige.bitrix24.ru";  // только для формирования ссылок
+const WEBHOOK_URL = 'https://b24-964ige.bitrix24.ru/rest/1/s5e6wykwdgtxuuoh/';
 
-const MAX_SIZE = 300 * 1024;                   // лимит размера фото после сжатия
-const FIXED_PHRASE = "Возврат МИ в ЛУ";
+const URL_USER_ID = new URLSearchParams(location.search).get('userId');
 
-const UF_FIELD = "UF_CRM_1791016249";
-const UF_VALUE_YES = 1;
-
-const MAX_PHOTOS = 5;
-
-// ============================================================
-//  Универсальный вызов метода Битрикс24 через прокси
-//
-//    await b24("crm.deal.get",  { id: 123 })          → GET
-//    await b24("crm.deal.update", { id: 123, fields: {...} }) → POST
-//
-//  Метод POST/GET выбирается по соглашению:
-//  методы, изменяющие данные (comment.add, deal.update,
-//  im.message.add, tasks.task.add и т.п.) идут POST.
-//  Методы-читатели (deal.get, deal.list, deal.fields,
-//  contact.get и т.п.) — GET.
-// ============================================================
-
-const POST_METHODS_PREFIX = [
-  "crm.timeline.comment.add",
-  "crm.deal.update",
-  "crm.deal.add",
-  "crm.contact.update",
-  "crm.contact.add",
-  "crm.timeline.comment.update",
-  "im.message.add",
-  "tasks.task.add",
-  "tasks.task.update"
+const STAGES = [
+    { id: '1', name: 'Заявка оформлена' },
+    { id: '6', name: 'Принято в работу' },
+    { id: '3', name: 'В работе' },
+    { id: '5', name: 'Готово' },
 ];
 
-function isPostMethod(method) {
-  return POST_METHODS_PREFIX.indexOf(method) !== -1;
+const FIELD_ADDRESS      = 'UF_CRM_1592536932491';
+const FIELD_EQUIP        = 'UF_CRM_1595995680751';
+const FIELD_DECLARED     = 'UF_CRM_1689057182080';
+const FIELD_MEMO         = 'UF_CRM_1592535826065';
+const FIELD_FILES        = 'UF_CRM_1641387572501';
+const FIELD_WORK_DONE    = 'UF_CRM_1668223753604';
+const FIELD_DATE_START   = 'BEGINDATE';           
+
+// ============================================================
+// УТИЛИТЫ
+// ============================================================
+let currentDealId = null;
+let currentDeal = null;
+let contactsCache = {};
+let validationError = '';
+let isProcessingFile = false;
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-async function b24(method, params = {}) {
-  const url = new URL(PROXY);
-  url.searchParams.set("app", APP);
-  url.searchParams.set("method", method);
-
-  const usePost = isPostMethod(method);
-
-  // Для GET — параметры уходят в query string
-  if (!usePost) {
-    for (const [k, v] of Object.entries(params)) {
-      url.searchParams.set(k, v);
-    }
-  }
-
-  const response = await fetch(url.toString(), {
-    method: usePost ? "POST" : "GET",
-    headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/json"
-    },
-    body: usePost ? JSON.stringify(params) : undefined
-  });
-
-  let data;
-  try {
-    data = await response.json();
-  } catch (e) {
-    throw new Error(`Сервер вернул не JSON (HTTP ${response.status})`);
-  }
-
-  if (data && data.error) {
-    const msg = data.error_description
-      ? `${data.error}: ${data.error_description}`
-      : data.error;
-    throw new Error(msg);
-  }
-
-  return data.result;
+function apiCall(method, params = {}) {
+    return fetch(WEBHOOK_URL + method, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params)
+    }).then(r => r.json());
 }
 
-// ==== ЭЛЕМЕНТЫ ====
-const $ = id => document.getElementById(id);
-const dealIdEl = $("dealId");
-const btnPhoto = $("btnPhoto");
-const btnGallery = $("btnGallery");
-const btnSend = $("btnSend");
-const previewsEl = $("previews");
-const info = $("info");
-const status = $("status");
-
-let photos = [];
-let isProcessing = false;
-
-// ==== ВЫБОР ФОТО ====
-function pickPhoto(useCamera) {
-  if (isProcessing) return;
-  if (photos.length >= MAX_PHOTOS) {
-    info.textContent = `Достигнут лимит: ${MAX_PHOTOS} фото`;
-    return;
-  }
-
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  if (useCamera) input.capture = "environment";
-  input.style.display = "none";
-
-  input.addEventListener("change", async (e) => {
-    const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
-    if (!file) {
-      input.remove();
-      return;
+// Проверка на пустоту
+function isEmpty(field) {
+    if (field === undefined || field === null || field === '') return true;
+    if (Array.isArray(field)) {
+        if (field.length === 0) return true;
+        return !field.some(item => {
+            if (typeof item === 'object' && item !== null) return !!(item.VALUE || item.TEXT);
+            return !!item;
+        });
     }
+    if (typeof field === 'object') return !(field.VALUE || field.TEXT);
+    return String(field).trim() === '—' || String(field).trim() === '';
+}
 
-    isProcessing = true;
-    btnPhoto.disabled = true;
-    btnGallery.disabled = true;
-    info.textContent = "Обработка фото...";
+// Очистка текста от BB-кода и HTML-тегов
+function cleanText(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/\[\/?[a-zA-Z0-9=\-\s"'#]+\]/g, ' ')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function extractText(field) {
+    if (isEmpty(field)) return '—';
+    let result = '';
+    if (Array.isArray(field)) {
+        result = field.map(item => {
+            if (item && typeof item === 'object') return item.VALUE || item.TEXT || '';
+            return item;
+        }).filter(Boolean).join(', ');
+    } else if (typeof field === 'object') {
+        result = field.VALUE || field.TEXT || '—';
+    } else {
+        result = String(field);
+    }
+    return cleanText(result) || '—';
+}
+
+function formatDate(field) {
+    if (!field) return '—';
+    if (typeof field === 'string' && field.includes('T')) {
+        const d = new Date(field);
+        if (!isNaN(d)) {
+            return String(d.getDate()).padStart(2, '0') + '.' +
+                   String(d.getMonth() + 1).padStart(2, '0') + '.' +
+                   d.getFullYear();
+        }
+    }
+    return field;
+}
+
+async function fetchContactInfo(contactId) {
+    if (!contactId) return null;
+    if (contactsCache[contactId]) return contactsCache[contactId];
+    
+    try {
+        const res = await apiCall('crm.contact.get', { id: contactId });
+        if (res.result) {
+            const c = res.result;
+            let name = [c.NAME, c.LAST_NAME].filter(Boolean).join(' ').trim() 
+                       || c.TITLE || ('Контакт #' + contactId);
+            
+            let phones = [];
+            if (c.PHONE && Array.isArray(c.PHONE)) {
+                phones = c.PHONE.map(p => p.VALUE).filter(Boolean);
+            }
+            
+            let html = escapeHtml(name);
+            if (phones.length > 0) {
+                const phoneLinks = phones.map(p => `<a href="tel:${p.replace(/[^\d+]/g, '')}" style="color:#2d6cdf; text-decoration:none;">${escapeHtml(p)}</a>`).join(', ');
+                html += ` (${phoneLinks})`;
+            }
+            
+            contactsCache[contactId] = html;
+            return html;
+        }
+    } catch (e) { /* ignore */ }
+    return 'Контакт #' + contactId;
+}
+
+// ============================================================
+// ЗАГРУЗКА СПИСКА СДЕЛОК
+// ============================================================
+async function loadDeals() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('error').style.display = 'none';
+    document.getElementById('content').style.display = 'none';
+
+    if (!URL_USER_ID) {
+        document.getElementById('loading').style.display = 'none';
+        const errEl = document.getElementById('error');
+        errEl.style.display = 'block';
+        errEl.textContent = 'Ошибка: В ссылке отсутствует ID инженера (параметр ?userId=).';
+        return;
+    }
 
     try {
-      const { base64, size, name } = await compressImage(file);
-      photos.push({ base64, name, size });
-      renderPreviews();
-      info.textContent = `Добавлено: ${name}, ~${Math.round(size / 1024)} КБ. Всего: ${photos.length}`;
-    } catch (err) {
-      console.error(err);
-      info.textContent = "Ошибка обработки фото: " + err.message;
-    } finally {
-      isProcessing = false;
-      btnPhoto.disabled = false;
-      btnGallery.disabled = false;
-      input.remove();
-    }
-  });
+        const stageIds = STAGES.map(s => s.id);
+        const res = await apiCall('crm.deal.list', {
+            filter: {
+                '=ASSIGNED_BY_ID': URL_USER_ID,
+                '@STAGE_ID': stageIds
+            },
+            select: ['ID', 'TITLE', 'STAGE_ID', 'ASSIGNED_BY_ID', FIELD_ADDRESS, FIELD_DATE_START],
+            order: { ID: 'ASC' }
+        });
 
-  document.body.appendChild(input);
-  input.click();
+        if (res.error) throw new Error(res.error_description || res.error);
+
+        const deals = res.result || [];
+
+        const byStage = {};
+        STAGES.forEach(s => byStage[s.id] = []);
+        deals.forEach(d => {
+            if (byStage[d.STAGE_ID]) byStage[d.STAGE_ID].push(d);
+        });
+
+        STAGES.forEach((s, idx) => {
+            const n = idx + 1;
+            document.getElementById('badge-stage' + n).textContent = byStage[s.id].length;
+            renderList('list-stage' + n, byStage[s.id], 'Нет заявок');
+        });
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+    } catch (e) {
+        document.getElementById('loading').style.display = 'none';
+        const errEl = document.getElementById('error');
+        errEl.style.display = 'block';
+        errEl.textContent = 'Ошибка загрузки: ' + e.message;
+    }
 }
 
-btnPhoto.addEventListener("click", () => pickPhoto(true));
-btnGallery.addEventListener("click", () => pickPhoto(false));
+function renderList(containerId, items, emptyText) {
+    const container = document.getElementById(containerId);
+    if (items.length === 0) {
+        container.innerHTML = '<div class="empty">' + emptyText + '</div>';
+        return;
+    }
+    container.innerHTML = items.map(item => {
+        const addr = extractText(item[FIELD_ADDRESS]);
+        const date = formatDate(item[FIELD_DATE_START]);
+        let meta = [];
+        if (addr !== '—') meta.push(`<span class="card-addr">📍 ${escapeHtml(addr)}</span>`);
+        if (date !== '—') meta.push(`<span>📅 ${date}</span>`);
+        
+        let metaStr = meta.length > 0 ? meta.join(' ') : `ID: ${item.ID}`;
 
-function renderPreviews() {
-  previewsEl.innerHTML = "";
-  photos.forEach((p, idx) => {
-    const wrap = document.createElement("div");
-    wrap.className = "thumb";
+        return `
+            <div class="card" onclick="openDeal(${item.ID})">
+                <div class="card-title">${escapeHtml(item.TITLE || ('Сделка #' + item.ID))}</div>
+                <div class="card-meta">${metaStr}</div>
+            </div>
+        `;
+    }).join('');
+}
 
-    const img = document.createElement("img");
-    img.src = "data:image/jpeg;base64," + p.base64;
-    img.alt = p.name;
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+}
 
-    const del = document.createElement("button");
-    del.type = "button";
-    del.className = "del";
-    del.textContent = "✕";
-    del.title = "Удалить";
-    del.addEventListener("click", () => {
-      photos.splice(idx, 1);
-      renderPreviews();
-      info.textContent = photos.length ? `Фото: ${photos.length}` : "";
+// ============================================================
+// КАРТОЧКА СДЕЛКИ
+// ============================================================
+async function openDeal(id) {
+    currentDealId = id;
+    validationError = '';
+    const overlay = document.getElementById('modalOverlay');
+    const modal = document.getElementById('modalContent');
+    modal.innerHTML = '<div class="loading">Загрузка…</div>';
+    overlay.classList.add('active');
+
+    try {
+        const res = await apiCall('crm.deal.get', { id });
+        if (res.error) throw new Error(res.error_description || res.error);
+        const deal = res.result;
+        currentDeal = deal;
+
+        const contactInfo = await fetchContactInfo(deal.CONTACT_ID);
+        
+        // Обработка файлов
+        let filesHtml = '—';
+        if (!isEmpty(deal[FIELD_FILES])) {
+            const fileIds = Array.isArray(deal[FIELD_FILES]) ? deal[FIELD_FILES] : [deal[FIELD_FILES]];
+            const fileLinks = await Promise.all(fileIds.map(async fId => {
+                const idVal = typeof fId === 'object' ? (fId.ID || fId.id || fId.FILE_ID) : fId;
+                try {
+                    const diskRes = await apiCall('disk.file.get', { id: idVal });
+                    if (diskRes.result && diskRes.result.DOWNLOAD_URL) {
+                        return `<a href="${diskRes.result.DOWNLOAD_URL}" target="_blank">📎 ${escapeHtml(diskRes.result.NAME)}</a>`;
+                    }
+                } catch(e) { console.error("Ошибка файла", e); }
+                return `<span>📎 Файл #${idVal}</span>`;
+            }));
+            filesHtml = `<div class="files-list">${fileLinks.join('')}</div>`;
+        }
+
+        const currentStage = deal.STAGE_ID;
+        const buttonsHtml = STAGES.map(s => {
+            const isCurrent = s.id === currentStage;
+            return `<button class="stage-btn ${isCurrent ? 'current' : ''}"
+                        data-stage="${s.id}"
+                        ${isCurrent ? 'disabled' : ''}
+                        onclick="changeStage('${s.id}')">
+                        <span>${escapeHtml(s.name)}</span>
+                        <span class="stage-btn-mark">${isCurrent ? 'текущая' : '→'}</span>
+                    </button>`;
+        }).join('');
+
+        let fieldsHtml = '';
+
+        if (!isEmpty(deal[FIELD_ADDRESS])) {
+            fieldsHtml += `<div class="field"><div class="field-label">Адрес</div><div class="field-value">${escapeHtml(extractText(deal[FIELD_ADDRESS]))}</div></div>`;
+        }
+        if (!isEmpty(deal[FIELD_DATE_START])) {
+            fieldsHtml += `<div class="field"><div class="field-label">Дата начала</div><div class="field-value">${formatDate(deal[FIELD_DATE_START])}</div></div>`;
+        }
+        if (!isEmpty(deal[FIELD_EQUIP])) {
+            fieldsHtml += `<div class="field"><div class="field-label">Наименование МИ</div><div class="field-value multiline">${escapeHtml(extractText(deal[FIELD_EQUIP]))}</div></div>`;
+        }
+        if (!isEmpty(deal[FIELD_DECLARED])) {
+            fieldsHtml += `<div class="field"><div class="field-label">Заявленная информация</div><div class="field-value multiline">${escapeHtml(extractText(deal[FIELD_DECLARED]))}</div></div>`;
+        }
+        if (!isEmpty(deal.COMMENTS)) {
+            fieldsHtml += `<div class="field"><div class="field-label">Комментарий</div><div class="field-value multiline">${escapeHtml(extractText(deal.COMMENTS))}</div></div>`;
+        }
+        if (!isEmpty(deal[FIELD_MEMO])) {
+            fieldsHtml += `<div class="field"><div class="field-label">Памятка</div><div class="field-value multiline">${escapeHtml(extractText(deal[FIELD_MEMO]))}</div></div>`;
+        }
+        if (contactInfo) {
+            fieldsHtml += `<div class="field"><div class="field-label">Контакт</div><div class="field-value">${contactInfo}</div></div>`;
+        }
+
+        // Блок файлов и добавления фото
+        let filesBlockHtml = '';
+        if (filesHtml !== '—') {
+            filesBlockHtml += `<div class="field"><div class="field-label">Файлы по сделке</div><div class="field-value">${filesHtml}</div></div>`;
+        }
+        
+        filesBlockHtml += `
+            <div class="field">
+                <button class="btn-add-file" onclick="pickPhoto()">📷 Добавить фото</button>
+            </div>
+        `;
+
+        // Блок выполненных работ
+        const workDoneText = extractText(deal[FIELD_WORK_DONE]);
+        const hasWorkDone = !isEmpty(deal[FIELD_WORK_DONE]);
+
+        let workDoneHtml = '';
+        if (hasWorkDone) {
+            workDoneHtml = `
+            <div class="field">
+                <div class="field-label">Выполненные работы <span style="cursor:pointer; color:#2d6cdf;" onclick="editWorkDone('${escapeHtml(workDoneText).replace(/'/g, "\\'")}')">✎</span></div>
+                <div class="field-value multiline">${escapeHtml(workDoneText)}</div>
+            </div>`;
+        } else {
+            workDoneHtml = `
+            <div class="field">
+                <div class="field-label">Выполненные работы</div>
+                <button class="btn-add-work" onclick="editWorkDone('')">+ Добавить</button>
+            </div>`;
+        }
+
+        // Блок ошибки (если есть)
+        let errorHtml = validationError ? `<div class="validation-error">${validationError}</div>` : '';
+
+        modal.innerHTML = `
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <h3>${escapeHtml(deal.TITLE || ('Сделка #' + deal.ID))}</h3>
+
+            ${fieldsHtml}
+            ${filesBlockHtml}
+            ${workDoneHtml}
+
+            ${errorHtml}
+
+            <div class="stage-buttons">
+                ${buttonsHtml}
+            </div>
+
+            <button class="btn btn-secondary" onclick="closeModal()"
+                    style="margin-top:16px; width:100%; padding:14px; border:none; border-radius:12px; font-size:16px; font-weight:600; background:#e9ecef; color:#333; cursor:pointer;">
+                Закрыть
+            </button>
+        `;
+    } catch (e) {
+        modal.innerHTML = `
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <div class="error-msg">Ошибка: ${escapeHtml(e.message)}</div>
+        `;
+    }
+}
+
+// ============================================================
+// ДОБАВЛЕНИЕ ФОТО (как в приложении "Возврат МИ")
+// ============================================================
+function pickPhoto() {
+    if (isProcessingFile) return;
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.style.display = "none";
+
+    input.addEventListener("change", async (e) => {
+        const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+        if (!file) {
+            input.remove();
+            return;
+        }
+
+        isProcessingFile = true;
+        const btn = document.querySelector('.btn-add-file');
+        if(btn) { btn.disabled = true; btn.textContent = 'Загрузка...'; }
+
+        try {
+            const base64 = await fileToBase64(file);
+            const fileDataArray = [[file.name, base64]];
+
+            const res = await apiCall('crm.deal.update', {
+                id: currentDealId,
+                fields: { [FIELD_FILES]: fileDataArray }
+            });
+            
+            if (res.error) throw new Error(res.error_description || res.error);
+
+            showToast('Фото загружено');
+            openDeal(currentDealId); // Перерисовываем
+            
+        } catch (err) {
+            showToast('Ошибка загрузки: ' + err.message);
+            if(btn) { btn.disabled = false; btn.textContent = '📷 Добавить фото'; }
+        } finally {
+            isProcessingFile = false;
+            input.remove();
+        }
     });
 
-    wrap.appendChild(img);
-    wrap.appendChild(del);
-    previewsEl.appendChild(wrap);
-  });
+    document.body.appendChild(input);
+    input.click();
 }
 
-function compressImage(file, maxSize = MAX_SIZE) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        let { width, height } = img;
-
-        const MAX_DIM = 1600;
-        if (width > MAX_DIM || height > MAX_DIM) {
-          if (width > height) {
-            height = Math.round(height * MAX_DIM / width);
-            width = MAX_DIM;
-          } else {
-            width = Math.round(width * MAX_DIM / height);
-            height = MAX_DIM;
-          }
-        }
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        let quality = 0.85;
-        let dataUrl = canvas.toDataURL("image/jpeg", quality);
-
-        while (dataUrl.length * 0.75 > maxSize && quality > 0.2) {
-          quality -= 0.1;
-          dataUrl = canvas.toDataURL("image/jpeg", quality);
-        }
-
-        const base64 = dataUrl.split(",")[1];
-        const size = Math.round(base64.length * 0.75);
-        const name = `photo_${Date.now()}.jpg`;
-
-        resolve({ base64, size, name });
-      };
-      img.onerror = () => reject(new Error("Не удалось загрузить изображение"));
-      img.src = reader.result;
-    };
-    reader.onerror = () => reject(new Error("Не удалось прочитать файл"));
-    reader.readAsDataURL(file);
-  });
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => reader.result.split(',')[1];
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
-// ==== ОТПРАВКА ====
-btnSend.addEventListener("click", async () => {
-  const dealId = dealIdEl.value.trim();
-  const comment = $("comment").value.trim();
-
-  if (!dealId) return showStatus("Укажите ID сделки", false);
-  if (!comment && photos.length === 0) return showStatus("Добавьте комментарий или фото", false);
-  if (isProcessing) return showStatus("Дождитесь окончания обработки фото", false);
-
-  btnSend.disabled = true;
-  showStatus("Отправка...", true);
-
-  try {
-    const fullComment = comment
-      ? FIXED_PHRASE + "\n" + comment
-      : FIXED_PHRASE;
-
-    const fields = {
-      ENTITY_TYPE: "deal",
-      ENTITY_ID: dealId,
-      COMMENT: fullComment
-    };
-
-    if (photos.length > 0) {
-      fields.FILES = photos.map(p => [p.name, p.base64]);
+// ============================================================
+// РЕДАКТИРОВАНИЕ ВЫПОЛНЕННЫХ РАБОТ
+// ============================================================
+function editWorkDone(currentText) {
+    const workDoneHtml = `
+        <div class="field">
+            <div class="field-label">Выполненные работы</div>
+            <textarea id="workDoneInput" class="edit-textarea" rows="4" placeholder="Введите текст...">${currentText}</textarea>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+                <button class="btn-save" onclick="saveWorkDone()">Сохранить</button>
+                <button class="btn-cancel" onclick="openDeal(${currentDealId})">Отмена</button>
+            </div>
+        </div>
+    `;
+    
+    const fields = document.querySelectorAll('.field');
+    let targetField = null;
+    fields.forEach(f => {
+        if (f.innerHTML.includes('Выполненные работы')) targetField = f;
+    });
+    
+    if (targetField) {
+        targetField.outerHTML = workDoneHtml;
     }
+}
 
-    // 1. Добавляем комментарий к сделке (с фото, если есть)
-    await b24("crm.timeline.comment.add", { fields: fields });
+async function saveWorkDone() {
+    const input = document.getElementById('workDoneInput');
+    if (!input) return;
+    
+    const text = input.value.trim();
+    const btn = document.querySelector('.btn-save');
+    if(btn) { btn.disabled = true; btn.textContent = 'Сохранение...'; }
 
-    // 2. Обновляем пользовательское поле UF_CRM_1791016249 = 1
-    let ufNote = "";
     try {
-      await b24("crm.deal.update", {
-        id: dealId,
-        fields: { [UF_FIELD]: UF_VALUE_YES }
-      });
-      ufNote = "\n✅ Поле МИ возврат=Да";
+        const res = await apiCall('crm.deal.update', {
+            id: currentDealId,
+            fields: { [FIELD_WORK_DONE]: text }
+        });
+        if (res.error) throw new Error(res.error_description || res.error);
+
+        showToast('Выполненные работы сохранены');
+        openDeal(currentDealId); 
+        
     } catch (e) {
-      console.warn("Не удалось обновить поле " + UF_FIELD + ":", e);
-      ufNote = `\n⚠️ Поле МИ возврат не обновлено: ${e.message}`;
+        showToast('Ошибка: ' + e.message);
+        if(btn) { btn.disabled = false; btn.textContent = 'Сохранить'; }
+    }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    currentDealId = null;
+    currentDeal = null;
+    validationError = '';
+}
+
+// ============================================================
+// СМЕНА СТАДИИ
+// ============================================================
+async function changeStage(stageId) {
+    if (!currentDealId) return;
+    if (currentDeal && currentDeal.STAGE_ID === stageId) return;
+
+    // ПРОВЕРКА: Если пытаемся перевести в "Готово" (id: '5')
+    if (stageId === '5') {
+        const workDoneField = currentDeal[FIELD_WORK_DONE];
+        if (isEmpty(workDoneField)) {
+            validationError = 'Нельзя перевести в "Готово": сначала заполните поле "Выполненные работы".';
+            openDeal(currentDealId);
+            return;
+        }
     }
 
-    showStatus("✅ Комментарий добавлен в сделку " + dealId + ufNote, true);
+    validationError = '';
 
-    // Сброс формы
-    photos = [];
-    renderPreviews();
-    info.textContent = "";
-    $("comment").value = "";
+    const stageName = STAGES.find(s => s.id === stageId)?.name || stageId;
+    document.querySelectorAll('.stage-btn').forEach(b => b.disabled = true);
 
-  } catch (err) {
-    console.error(err);
-    showStatus("Ошибка: " + err.message, false);
-  } finally {
-    btnSend.disabled = false;
-  }
-});
+    try {
+        const res = await apiCall('crm.deal.update', {
+            id: currentDealId,
+            fields: { STAGE_ID: stageId }
+        });
+        if (res.error) throw new Error(res.error_description || res.error);
 
-function showStatus(text, ok) {
-  status.textContent = text;
-  status.className = ok ? "ok" : "err";
-  status.style.display = "block";
+        showToast('Стадия изменена: ' + stageName);
+        closeModal();
+        loadDeals();
+    } catch (e) {
+        showToast('Ошибка: ' + e.message);
+        document.querySelectorAll('.stage-btn').forEach(b => {
+            if (!b.classList.contains('current')) b.disabled = false;
+        });
+    }
 }
-</script>
 
+// ============================================================
+// СТАРТ
+// ============================================================
+loadDeals();
+</script>
 </body>
 </html>
