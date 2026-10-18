@@ -251,7 +251,6 @@ function apiCall(method, params = {}) {
     }).then(r => r.json());
 }
 
-// Проверка на пустоту
 function isEmpty(field) {
     if (field === undefined || field === null || field === '') return true;
     if (Array.isArray(field)) {
@@ -265,7 +264,6 @@ function isEmpty(field) {
     return String(field).trim() === '—' || String(field).trim() === '';
 }
 
-// Очистка текста от BB-кода и HTML-тегов
 function cleanText(str) {
     if (!str) return '';
     return String(str)
@@ -422,7 +420,7 @@ function escapeHtml(s) {
 // ============================================================
 async function openDeal(id) {
     currentDealId = id;
-    validationError = '';
+    // ВАЖНО: Здесь больше нет сброса validationError = '';
     const overlay = document.getElementById('modalOverlay');
     const modal = document.getElementById('modalContent');
     modal.innerHTML = '<div class="loading">Загрузка…</div>';
@@ -551,7 +549,7 @@ async function openDeal(id) {
 }
 
 // ============================================================
-// ДОБАВЛЕНИЕ ФОТО (как в приложении "Возврат МИ")
+// ДОБАВЛЕНИЕ ФОТО
 // ============================================================
 function pickPhoto() {
     if (isProcessingFile) return;
@@ -584,7 +582,7 @@ function pickPhoto() {
             if (res.error) throw new Error(res.error_description || res.error);
 
             showToast('Фото загружено');
-            openDeal(currentDealId); // Перерисовываем
+            openDeal(currentDealId);
             
         } catch (err) {
             showToast('Ошибка загрузки: ' + err.message);
@@ -650,6 +648,7 @@ async function saveWorkDone() {
         if (res.error) throw new Error(res.error_description || res.error);
 
         showToast('Выполненные работы сохранены');
+        validationError = ''; // Сбрасываем ошибку при успешном сохранении
         openDeal(currentDealId); 
         
     } catch (e) {
@@ -662,7 +661,7 @@ function closeModal() {
     document.getElementById('modalOverlay').classList.remove('active');
     currentDealId = null;
     currentDeal = null;
-    validationError = '';
+    validationError = ''; // Сбрасываем ошибку при закрытии окна
 }
 
 // ============================================================
@@ -677,7 +676,7 @@ async function changeStage(stageId) {
         const workDoneField = currentDeal[FIELD_WORK_DONE];
         if (isEmpty(workDoneField)) {
             validationError = 'Нельзя перевести в "Готово": сначала заполните поле "Выполненные работы".';
-            openDeal(currentDealId);
+            openDeal(currentDealId); // Перерисовываем окно с ошибкой
             return;
         }
     }
